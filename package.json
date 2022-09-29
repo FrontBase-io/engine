@@ -1,0 +1,25 @@
+{
+  "name": "frontbase-engine",
+  "version": "1.0.0",
+  "description": "Engine is responsible for all background work, such as formula resolutions and process executions.",
+  "main": "index.js",
+  "repository": "https://github.com/FrontBase-io/engine",
+  "author": "Vic van Cooten",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && node dist/engine.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "frontbase-formulas-server": "^0.0.1",
+    "mongodb": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.172",
+    "@types/node": "^16.4.13",
+    "ts-node": "^10.2.0",
+    "typescript": "^4.5.4"
+  }
+}
