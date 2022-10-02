@@ -19,6 +19,7 @@ async function main() {
 
   // Keep an overview of models to prevent from constantly having to load these from the database
   let models: ModelType[] = []
+  let modelMap: { [key: string]: ModelType } = {}
 
   // Keeps track of compiled formulas
   const formulas: { [key: string]: Formula } = {}
@@ -36,6 +37,7 @@ async function main() {
 
   // Load all models
   models = await db.collection('Models').find().toArray()
+  models.forEach((model) => (modelMap[model.key] = model))
 
   // 🧪 Formulas
   // Loop through all models to find fields that are formulasmodels.forEach(
@@ -43,17 +45,23 @@ async function main() {
    Object.keys(model.fields ?? {}).forEach((fieldKey) => {
     const field = model.fields[fieldKey]
     if (field.settings?.formula) {
-     const formula = new Formula(field.settings?.formula, field.name)
+     // Create formula instance
+     const formula = new Formula(
+      field.settings?.formula,
+      `${model.label_plural}: ${field.name}`,
+      model.key,
+      modelMap
+     )
 
      formula.onReady.then(() => {
       const formulaRef = `${model.key}.${fieldKey}`
 
       // Store dependencies as field triggers
       formula.dependencies.map((dep) => {
-       if (!fieldTriggers[model.key]) fieldTriggers[model.key] = {}
-       if (!fieldTriggers[model.key][dep.key])
-        fieldTriggers[model.key][dep.key] = []
-       fieldTriggers[model.key][dep.key].push({
+       if (!fieldTriggers[dep.model]) fieldTriggers[dep.model] = {}
+       if (!fieldTriggers[dep.model][dep.field])
+        fieldTriggers[dep.model][dep.field] = []
+       fieldTriggers[dep.model][dep.field].push({
         type: 'formula',
         formulaId: formulaRef,
         formulaResult: fieldKey,
@@ -87,15 +95,21 @@ async function main() {
          if (formulas[triggeredEffect.formulaId]) {
           const formula = formulas[triggeredEffect.formulaId]
 
-          formula.compileWithObject(change.fullDocument).then((result) => {
-           // Update
-           db
-            .collection('Objects')
-            .updateOne(
-             { _id: change.documentKey._id },
-             { $set: { [triggeredEffect.formulaResult]: result } }
-            )
-          })
+          if (formula.isInstant) {
+           formula.compileWithObject(change.fullDocument).then((result) => {
+            console.log(result)
+
+            // Update
+            db
+             .collection('Objects')
+             .updateOne(
+              { _id: change.documentKey._id },
+              { $set: { [triggeredEffect.formulaResult]: result } }
+             )
+           })
+          } else {
+           console.log('test', formula)
+          }
          }
         }
 

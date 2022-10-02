@@ -135,14 +135,14 @@ dotenv@^16.0.1:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.2.tgz#0b0f8652c016a3858ef795024508cddc4bffc5bf"
   integrity sha512-JvpYKUmzQhYoIFgK2MOnF3bciIZoItIIoryihy0rIA+H4Jy0FmgyKYAHCTN98P5ybGSJcIFbh6QKeJdtZd1qhA==
 
-frontbase-formulas-server@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/frontbase-formulas-server/-/frontbase-formulas-server-0.0.1.tgz#092a77f584e5a480158dd1a2c71e760547dc7565"
-  integrity sha512-r38bvlLZ6e/k+BBr3PJn8dyYG9HfI9P5dy3bX/puUwzz/dA9345DXqLsFADE6kU5nxGxp9fHPkhZtvKU8p06IQ==
+frontbase-formulas-server@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/frontbase-formulas-server/-/frontbase-formulas-server-0.0.2.tgz#e28bcc160f3f230392c63fb4274052a1fa846082"
+  integrity sha512-rFYNUa+ynGvsZMm2uvPbhnHCgBsTzsLuIV2Ua3uYeNtTVdEuJcXLi3crpGplhFbHixQkRMEFu/M7u2cQznt6DA==
   dependencies:
     date-fns "^2.25.0"
     lodash "^4.17.20"
-    uniqid "^5.2.0"
+    uniqid "^5.4.0"
 
 ieee754@^1.1.13:
   version "1.2.1"
@@ -252,7 +252,7 @@ typescript@^4.5.4:
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.8.4.tgz#c464abca159669597be5f96b8943500b238e60e6"
   integrity sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==
 
-uniqid@^5.2.0:
+uniqid@^5.4.0:
   version "5.4.0"
   resolved "https://registry.yarnpkg.com/uniqid/-/uniqid-5.4.0.tgz#4e17bfcab66dfe33563411ae0c801f46ef964e66"
   integrity sha512-38JRbJ4Fj94VmnC7G/J/5n5SC7Ab46OM5iNtSstB/ko3l1b5g7ALt4qzHFgGciFkyiRNtDXtLNb+VsxtMSE77A==
