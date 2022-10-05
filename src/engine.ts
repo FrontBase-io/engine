@@ -5,6 +5,8 @@ const client = new MongoClient(process.env.MONGO_URL)
 import { ModelType } from './Types/Models'
 
 import Formula from 'frontbase-formulas-server'
+import asyncMap from './helpers/asyncMap'
+import { ObjectId } from 'mongodb'
 
 async function main() {
  await client.connect()
@@ -50,7 +52,8 @@ async function main() {
       field.settings?.formula,
       `${model.label_plural}: ${field.name}`,
       model.key,
-      modelMap
+      modelMap,
+      db
      )
 
      formula.onReady.then(() => {
@@ -89,15 +92,18 @@ async function main() {
      if (fieldTriggers[change.fullDocument._meta.modelId]?.[changedFieldKey]) {
       // If we have one or more effects triggered, fire all the events.
       fieldTriggers[change.fullDocument._meta.modelId]?.[changedFieldKey].map(
-       (triggeredEffect) => {
+       async (triggeredEffect) => {
         // Formula
         if (triggeredEffect.type === 'formula') {
          if (formulas[triggeredEffect.formulaId]) {
           const formula = formulas[triggeredEffect.formulaId]
 
           if (formula.isInstant) {
+           // Todo: move to before save action
            formula.compileWithObject(change.fullDocument).then((result) => {
-            console.log(result)
+            console.log(
+             `Instant formula calculation for ${result} (${change.documentKey._id}).`
+            )
 
             // Update
             db
@@ -108,7 +114,73 @@ async function main() {
              )
            })
           } else {
-           console.log('test', formula)
+           // This is a remote dependency. We first need to find what objects are affected by this change.
+           const affectedObjectIds = []
+           const hierarchy = formula.dependencies.find(
+            (d) =>
+             d.model === change.fullDocument._meta.modelId &&
+             Object.keys(change.updateDescription.updatedFields).some(
+              (f) => d.field === f
+             )
+           )
+           let objectIds = [change.documentKey._id.toString()]
+
+           // Loop through the hierarchy and find all the objects
+           await asyncMap(
+            hierarchy.parents,
+            async (hierarchyLevel, hierarchyIndex) => {
+             let modelId = hierarchyLevel.model
+             let fieldId = hierarchyLevel.field
+             const oldObjectIds = [...objectIds]
+             objectIds = []
+
+             await asyncMap(
+              await db
+               .collection('Objects')
+               .find({
+                '_meta.modelId': modelId,
+                [fieldId]: { $in: oldObjectIds },
+               })
+               .toArray(),
+              (obj) => {
+               if (hierarchyIndex === hierarchy.parents.length - 1) {
+                // If this is the last level of the hierarchy, we add it to the found object IDs array
+                affectedObjectIds.push(obj._id)
+               } else {
+                // Intermediate step
+                // We store the object id into an array we use to go one level deeper into the hierarchy
+                objectIds.push(obj._id.toString())
+               }
+              }
+             )
+            }
+           )
+
+           // Now loop through the affected objects and calculate the formula for that object
+           console.log(
+            `Remote formula calculation for ${affectedObjectIds.join(', ')}.`
+           )
+
+           await asyncMap(
+            await db
+             .collection('Objects')
+             .find({
+              _id: { $in: affectedObjectIds },
+             })
+             .toArray(),
+            (object) => {
+             // Todo: move to before save action
+             formula.compileWithObject(object).then((result) => {
+              // Update
+              db
+               .collection('Objects')
+               .updateOne(
+                { _id: new ObjectId(object._id) },
+                { $set: { [triggeredEffect.formulaResult]: result } }
+               )
+             })
+            }
+           )
           }
          }
         }

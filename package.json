@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "dotenv": "^16.0.1",
-    "frontbase-formulas-server": "^0.0.2",
+    "frontbase-formulas-server": "^0.0.3",
     "mongodb": "^4.7.0"
   },
   "devDependencies": {
