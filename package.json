@@ -12,7 +12,7 @@
     "start": "tsc && node dist/engine.js"
   },
   "dependencies": {
-    "dotenv": "^16.0.1",
+    "dotenv": "^16.0.3",
     "frontbase-formulas-server": "^0.0.3",
     "mongodb": "^4.7.0"
   },
