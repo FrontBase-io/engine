@@ -102,7 +102,7 @@ async function main() {
            // Todo: move to before save action
            formula.compileWithObject(change.fullDocument).then((result) => {
             console.log(
-             `Instant formula calculation for ${result} (${change.documentKey._id}).`
+             `🧪 [${formula.label}] Instant formula calculation for ${result} (${change.documentKey._id}).`
             )
 
             // Update
@@ -123,64 +123,80 @@ async function main() {
               (f) => d.field === f
              )
            )
-           let objectIds = [change.documentKey._id.toString()]
 
            // Loop through the hierarchy and find all the objects
-           await asyncMap(
-            hierarchy.parents,
-            async (hierarchyLevel, hierarchyIndex) => {
-             let modelId = hierarchyLevel.model
-             let fieldId = hierarchyLevel.field
-             const oldObjectIds = [...objectIds]
-             objectIds = []
 
-             await asyncMap(
-              await db
-               .collection('Objects')
-               .find({
-                '_meta.modelId': modelId,
-                [fieldId]: { $in: oldObjectIds },
-               })
-               .toArray(),
-              (obj) => {
-               if (hierarchyIndex === hierarchy.parents.length - 1) {
-                // If this is the last level of the hierarchy, we add it to the found object IDs array
-                affectedObjectIds.push(obj._id)
-               } else {
-                // Intermediate step
-                // We store the object id into an array we use to go one level deeper into the hierarchy
-                objectIds.push(obj._id.toString())
+           if (hierarchy.parents.length === 0) {
+            // We have no parents, this means the highgest level of a remote formula was triggerd
+            // Add only the current object to the affected list.
+            affectedObjectIds.push(change.documentKey._id)
+           } else {
+            // We have parents to traverse. Do this to find what objects are affected by this change
+            let objectIds = [change.documentKey._id.toString()]
+            await asyncMap(
+             hierarchy.parents,
+             async (hierarchyLevel, hierarchyIndex) => {
+              let modelId = hierarchyLevel.model
+              let fieldId = hierarchyLevel.field
+              const oldObjectIds = [...objectIds]
+              objectIds = []
+
+              await asyncMap(
+               await db
+                .collection('Objects')
+                .find({
+                 '_meta.modelId': modelId,
+                 [fieldId]: { $in: oldObjectIds },
+                })
+                .toArray(),
+               (obj) => {
+                if (hierarchyIndex === hierarchy.parents.length - 1) {
+                 // If this is the last level of the hierarchy, we add it to the found object IDs array
+                 affectedObjectIds.push(obj._id)
+                } else {
+                 // Intermediate step
+                 // We store the object id into an array we use to go one level deeper into the hierarchy
+                 objectIds.push(obj._id.toString())
+                }
                }
-              }
-             )
-            }
-           )
+              )
+             }
+            )
+           }
 
            // Now loop through the affected objects and calculate the formula for that object
-           console.log(
-            `Remote formula calculation for ${affectedObjectIds.join(', ')}.`
-           )
+           if (affectedObjectIds.length > 0) {
+            console.log(
+             `🧪 [${
+              formula.label
+             }] Remote formula calculation for ${affectedObjectIds.join(', ')}.`
+            )
+            await asyncMap(
+             await db
+              .collection('Objects')
+              .find({
+               _id: { $in: affectedObjectIds },
+              })
+              .toArray(),
+             (object) => {
+              formula.compileWithObject(object).then((result) => {
+               console.log(`🧪 [${formula.label}] ---> ${result}`)
 
-           await asyncMap(
-            await db
-             .collection('Objects')
-             .find({
-              _id: { $in: affectedObjectIds },
-             })
-             .toArray(),
-            (object) => {
-             // Todo: move to before save action
-             formula.compileWithObject(object).then((result) => {
-              // Update
-              db
-               .collection('Objects')
-               .updateOne(
-                { _id: new ObjectId(object._id) },
-                { $set: { [triggeredEffect.formulaResult]: result } }
-               )
-             })
-            }
-           )
+               // Update
+               db
+                .collection('Objects')
+                .updateOne(
+                 { _id: new ObjectId(object._id) },
+                 { $set: { [triggeredEffect.formulaResult]: result } }
+                )
+              })
+             }
+            )
+           } else {
+            console.log(
+             `🧪 [${formula.label}] Remote calculation triggered, but no objects were affected.`
+            )
+           }
           }
          }
         }
