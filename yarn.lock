@@ -130,10 +130,10 @@ dotenv@^16.0.3:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.3.tgz#115aec42bac5053db3c456db30cc243a5a836a07"
   integrity sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==
 
-frontbase-formulas-server@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/frontbase-formulas-server/-/frontbase-formulas-server-0.0.3.tgz#150cf4f8c4be079f48e6377be36d7e0ad67cd6ec"
-  integrity sha512-qJtf15oooDnNDGhAuSayoxary6c32HNujLEk/GdR9QAUKvq6KBjNodvskbo3X5FCMmpr1OCe9dIyxqBIERoh3w==
+frontbase-formulas-server@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/frontbase-formulas-server/-/frontbase-formulas-server-0.0.4.tgz#e8b80e62cce1dfb8725e988fb32717795f4f1fb0"
+  integrity sha512-BIspDxJ/d1K6boGmY8Ybe6ZZCUkfeIqUSFdi0ywm+b+l5hY9Em2/Jq8Oq2iQD8r/HO2Hdww2wdv6LH8s9Abt5g==
   dependencies:
     date-fns "^2.25.0"
     lodash "^4.17.20"

@@ -42,7 +42,7 @@ async function main() {
   models.forEach((model) => (modelMap[model.key] = model))
 
   // 🧪 Formulas
-  // Loop through all models to find fields that are formulasmodels.forEach(
+  // Loop through all models to find fields that are formulas
   models.map((model: ModelType) => {
    Object.keys(model.fields ?? {}).forEach((fieldKey) => {
     const field = model.fields[fieldKey]
