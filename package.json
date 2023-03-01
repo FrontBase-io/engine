@@ -14,7 +14,7 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "frontbase-formulas-server": "^0.0.4",
-    "mongodb": "^5.0.0"
+    "mongodb": "^5.1.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.191",
